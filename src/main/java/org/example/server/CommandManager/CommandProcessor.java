@@ -27,7 +27,7 @@ public class CommandProcessor {
         switch (receivedCommandObject.getName()) {
             case "add":
                 commandObjectToSend.setMessage(
-                        (new AddCommand(receivedCommandObject.getName(), receivedCommandObject.getStudyGroup())).execute()
+                        (new AddCommand(receivedCommandObject.getName(), receivedCommandObject.getStudyGroup(), receivedCommandObject.getSenderUsername())).execute()
                 );
                 break;
 
@@ -134,5 +134,6 @@ public class CommandProcessor {
 
     public void setDatabaseManager(DatabaseManager databaseManager) {
         this.authLib.setDatabaseManager(databaseManager);
+        this.commandExecutor.setDatabaseManager(databaseManager);
     }
 }

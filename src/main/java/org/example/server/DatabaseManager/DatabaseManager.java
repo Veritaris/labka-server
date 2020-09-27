@@ -9,11 +9,15 @@ import org.example.server.Utils.UserObject;
 import java.sql.*;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.PriorityQueue;
 import java.util.UUID;
 
-@SuppressWarnings({"FieldCanBeLocal", "DuplicatedCode"})
+//executeSQL(String.format("delete from %s.users", this.schemaName));
+
+@SuppressWarnings({"FieldCanBeLocal", "DuplicatedCode", "FieldMayBeFinal"})
 public class DatabaseManager {
     private static final Logger logger = LogManager.getLogger();
+    private PriorityQueue<StudyGroup> groups;
     private static Connection dbConnection = null;
     private final String username;
     private final String password;
@@ -90,8 +94,56 @@ public class DatabaseManager {
         }
     }
 
-    public StudyGroup getGroup(int id) {
+    public String getGroupAuthor(Long id) {
         String getGroupSQL = String.format("select * from %s.users where username='%s'", this.schemaName, id);
+        try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
+            Statement statement = dbConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(getGroupSQL);
+
+            if (resultSet.next()) {
+                resultSet.getString("author");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void clearAll() {
+        executeSQL(String.format("delete from %s.study_groups", this.schemaName));
+    }
+
+    public void deleteById(Long id) {
+        executeSQL(String.format("delete from %s.study_groups where id=%s", this.schemaName, id));
+    }
+
+    public PriorityQueue<StudyGroup> getAllGroups() {
+        String getGroupSQL = String.format("select * from %s.study_groups", this.schemaName);
+        try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
+            Statement statement = dbConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(getGroupSQL);
+            groups = new PriorityQueue<>();
+
+            while (resultSet.next()) {
+                groups.add(constructStudyGroup(resultSet));
+            }
+            return groups;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+//    public boolean saveGroups(PriorityQueue<StudyGroup> studyGroups) {
+//        for (Object studyGroup: studyGroups.toArray()) {
+//            studyGroup = (StudyGroup) studyGroup;
+//            addGroup(((StudyGroup) studyGroup).getName(), );
+//        }
+//        return false;
+//    }
+
+    public StudyGroup getGroup(Long id) {
+        String getGroupSQL = String.format("select * from %s.study_groups where id='%s'", this.schemaName, id);
         try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
             Statement statement = dbConnection.createStatement();
             ResultSet resultSet = statement.executeQuery(getGroupSQL);
@@ -121,8 +173,7 @@ public class DatabaseManager {
         executeSQL(addGroupSQL);
     }
 
-
-    public void updateGroup(String id, String name, String semester, String x, String y, String students_amount, String nationality, String height, String weight, String adminName, String students_to_expel, String expelled_students) {
+    public void updateGroup(Long id, String name, Semester semester, Long x, Long y, Integer students_amount, Country nationality, Double height, Integer weight, String adminName, Integer students_to_expel, Integer expelled_students) {
 
         String admin_hash = DigestUtils.md5Hex(String.format("%s%s%s%s", nationality, height, weight, adminName));
 

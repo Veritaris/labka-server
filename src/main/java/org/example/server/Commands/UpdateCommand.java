@@ -13,6 +13,6 @@ public class UpdateCommand extends Commands{
     }
     @Override
     public ArrayList<String> execute(){
-        return manager.update(argument);
+        return manager.updateStudyGroup(argument);
     }
 }

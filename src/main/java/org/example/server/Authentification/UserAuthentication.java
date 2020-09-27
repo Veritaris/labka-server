@@ -3,6 +3,7 @@ package org.example.server.Authentification;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.server.Collection.StudyGroup;
 import org.example.server.CommandManager.CommandObject;
 import org.example.server.DatabaseManager.DatabaseManager;
 import org.example.server.Utils.UserObject;
@@ -11,12 +12,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.UUID;
 
+@SuppressWarnings("FieldMayBeFinal")
 public class UserAuthentication {
     private static final Logger logger = LogManager.getLogger();
-    private String username;
-    private String password;
-    private String passwordHash;
-    private String databasePasswordHash;
     private ArrayList<String> authenticatedUsers;
     private DatabaseManager databaseManager;
 
@@ -74,12 +72,8 @@ public class UserAuthentication {
         return this.authenticatedUsers.contains(hashUser(username, hashPassword(password)));
     }
 
-    public boolean hasPermissionToEdit(String username, CommandObject commandObject) {
-        return false;
-    }
-
-    public ArrayList<String> getAuthenticatedUsers(){
-        return this.authenticatedUsers;
+    public boolean hasPermissionToEdit(String username, Long groupID) {
+        return this.databaseManager.getGroupAuthor(groupID).equals(username);
     }
 
     public void setDatabaseManager(DatabaseManager databaseManager) {
