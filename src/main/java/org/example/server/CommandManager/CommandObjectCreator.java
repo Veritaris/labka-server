@@ -1,4 +1,4 @@
-package org.example.server.dependencies;
+package org.example.server.CommandManager;
 
 import java.util.Arrays;
 import java.util.List;

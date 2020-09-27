@@ -1,7 +1,6 @@
-package org.example.server.dependencies.Commands;
+package org.example.server.Commands;
 
 import java.util.ArrayList;
-import java.util.PriorityQueue;
 
 public class ShowCommand extends Commands{
 

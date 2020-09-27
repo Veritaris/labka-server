@@ -1,4 +1,4 @@
-package org.example.server.dependencies;
+package org.example.server.CommandManager;
 
 import org.example.server.Collection.*;
 

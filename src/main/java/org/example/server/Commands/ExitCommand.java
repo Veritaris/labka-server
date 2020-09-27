@@ -1,4 +1,4 @@
-package org.example.server.dependencies.Commands;
+package org.example.server.Commands;
 
 import java.util.ArrayList;
 

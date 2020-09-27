@@ -1,7 +1,7 @@
-package org.example.server.dependencies.Commands;
+package org.example.server.Commands;
 
 
-import org.example.server.dependencies.CommandExecutor;
+import org.example.server.CommandManager.CommandExecutor;
 
 import java.nio.file.Paths;
 

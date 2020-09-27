@@ -2,8 +2,8 @@ package org.example.server.Server;
 
 import java.nio.channels.DatagramChannel;
 
-import org.example.server.dependencies.CommandProcessor;
-import org.example.server.dependencies.CommandObject;
+import org.example.server.CommandManager.CommandProcessor;
+import org.example.server.CommandManager.CommandObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.core.config.Configurator;

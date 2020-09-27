@@ -1,4 +1,4 @@
-package org.example.server.dependencies;
+package org.example.server.CommandManager;
 
 
 import org.example.server.Collection.*;
@@ -178,10 +178,6 @@ public class CommandExecutor {
         groupAdmin = new Person(groupAdminName, adminHeight, adminWeight, adminNationality);
 
         return new StudyGroup(groupID, groupIdentifier, groupCurrentSemester, groupCoordinates, studentsCount, groupAdmin, studentsToExpelAmount, expelledStudentsAmount);
-    }
-
-    public void clearMessage() {
-        message.clear();
     }
 
     public void sortGroups() {

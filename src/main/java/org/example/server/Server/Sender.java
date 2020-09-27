@@ -1,6 +1,6 @@
 package org.example.server.Server;
 
-import org.example.server.dependencies.CommandObject;
+import org.example.server.CommandManager.CommandObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

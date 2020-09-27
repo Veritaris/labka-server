@@ -1,23 +1,12 @@
-package org.example.server.dependencies;
+package org.example.server.CommandManager;
 
-import org.example.server.dependencies.Commands.*;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import org.example.server.Commands.*;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class CommandProcessor {
-    private final CommandObjectCreator commandObjectCreator = new CommandObjectCreator();
-    private final Scanner consoleScanner = new Scanner(System.in);
-    private List<String> commandArguments = new ArrayList<>();
     private CommandObject commandObjectToSend;
     private CommandExecutor commandExecutor;
-    private CommandObject commandObject;
-    private List<String> commandArray;
     private String collectionsPath;
-    private String command;
 
     public CommandProcessor() {
 
@@ -128,9 +117,5 @@ public class CommandProcessor {
     public void setCommandExecutor(String collectionsFilePath) {
         this.collectionsPath = collectionsFilePath;
         this.commandExecutor = new CommandExecutor(this.collectionsPath);
-    }
-
-    public void close(){
-        this.consoleScanner.close();
     }
 }
