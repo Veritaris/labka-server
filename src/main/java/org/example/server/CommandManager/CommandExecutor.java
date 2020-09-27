@@ -1,11 +1,13 @@
 package org.example.server.CommandManager;
 
 
+import org.example.server.Authentification.UserAuthentication;
 import org.example.server.Collection.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.example.server.DatabaseManager.DatabaseManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -27,6 +29,8 @@ public class CommandExecutor {
     private File collectionsJSONFile;
     private Date creationDate;
 
+    private UserAuthentication authLib;
+
     private ObjectMapper mapper = new ObjectMapper();
     private JSONObject groupJSONObject;
     private JSONArray jsonArray;
@@ -41,7 +45,7 @@ public class CommandExecutor {
     private String semesterEnumValue;
     private String groupIdentifier;
     private String groupAdminName;
-    private long studentsCount;
+    private int studentsCount;
     private double adminHeight;
     private Person groupAdmin;
     private JSONObject admin;
@@ -159,7 +163,7 @@ public class CommandExecutor {
         expelledStudentsAmount = ((Long) groupJSONObject.get("expelledStudents")).intValue();
         coordinatesJson = (JSONObject) groupJSONObject.get("coordinates");
         semesterEnumValue = (String) groupJSONObject.get("semester");
-        studentsCount = (Long) groupJSONObject.get("studentsCount");
+        studentsCount = (Integer) groupJSONObject.get("studentsCount");
         groupIdentifier = (String) groupJSONObject.get("name");
         admin = (JSONObject) groupJSONObject.get("admin");
         groupID = (Long) groupJSONObject.get("id");
@@ -207,6 +211,24 @@ public class CommandExecutor {
     public ArrayList<String> show() {
         message.clear();
         groups.stream().forEachOrdered((p) -> message.add(p.toString()));
+        return message;
+    }
+
+    public ArrayList<String> login(String username, String rawPassword) {
+        message.clear();
+        message.add(authLib.loginUser(username, rawPassword));
+        return message;
+    }
+
+    public ArrayList<String> logout(String username, String rawPassword) {
+        message.clear();
+        message.add(authLib.logoutUser(username, rawPassword));
+        return message;
+    }
+
+    public ArrayList<String> register(String username, String rawPassword) {
+        message.clear();
+        message.add(authLib.createUser(username, rawPassword));
         return message;
     }
 
@@ -420,5 +442,9 @@ public class CommandExecutor {
         }
 
         return message;
+    }
+
+    public void setAuthLib(UserAuthentication authLib) {
+        this.authLib = authLib;
     }
 }

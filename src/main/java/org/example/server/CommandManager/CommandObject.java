@@ -15,6 +15,9 @@ public class CommandObject implements Serializable {
     private String stringArgument;
     private Long longArgument;
 
+    private String username = "";
+    private String password = "";
+
     private boolean isScripted = false;
     private boolean isFailed = false;
     private String failReason;
@@ -87,6 +90,19 @@ public class CommandObject implements Serializable {
         if (this.message != null) {
             this.message = new ArrayList<>();
         }
+    }
+
+    public void setSender(String username, String password) {
+        this.username = username;
+        this.password = password;
+    }
+
+    public String getSenderUsername() {
+        return this.username;
+    }
+
+    public String getSenderPassword() {
+        return this.password;
     }
 
     @Override

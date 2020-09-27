@@ -1,18 +1,26 @@
 package org.example.server.CommandManager;
 
+import org.example.server.Authentification.UserAuthentication;
 import org.example.server.Commands.*;
+import org.example.server.DatabaseManager.DatabaseManager;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class CommandProcessor {
     private CommandObject commandObjectToSend;
     private CommandExecutor commandExecutor;
     private String collectionsPath;
+    private UserAuthentication authLib;
 
     public CommandProcessor() {
 
     }
 
     public CommandObject processCommand(CommandObject receivedCommandObject) {
+
+        if (!authLib.isAuthenticated(receivedCommandObject.getSenderUsername(), receivedCommandObject.getSenderPassword())) {
+            return CommandObjectCreator.createErrorObject("401", "User not authorized");
+        }
+
         receivedCommandObject.clearMessage();
         commandObjectToSend = new CommandObject(receivedCommandObject.getName());
 
@@ -117,5 +125,14 @@ public class CommandProcessor {
     public void setCommandExecutor(String collectionsFilePath) {
         this.collectionsPath = collectionsFilePath;
         this.commandExecutor = new CommandExecutor(this.collectionsPath);
+    }
+
+    public void setAuthLib(UserAuthentication authLib) {
+        this.authLib = authLib;
+        this.commandExecutor.setAuthLib(this.authLib);
+    }
+
+    public void setDatabaseManager(DatabaseManager databaseManager) {
+        this.authLib.setDatabaseManager(databaseManager);
     }
 }
