@@ -7,7 +7,6 @@ import org.example.server.Collection.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.example.server.DatabaseManager.DatabaseManager;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -71,7 +70,7 @@ public class CommandExecutor {
         try {
             if ((new File(this.collectionsJSONFilePath)).exists()) {
                 this.collectionsJSONFile = new File(this.collectionsJSONFilePath);
-                loadCollections(this.collectionsJSONFile);
+                loadCollection(this.collectionsJSONFile);
             } else {
                 throw new FileNotFoundException();
             }
@@ -91,7 +90,7 @@ public class CommandExecutor {
         return commandExecutor;
     }
 
-    public void loadCollections(File collectionsJSONFile) {
+    public void loadCollection(File collectionsJSONFile) {
         try {
             if (!collectionsJSONFile.canRead() || !collectionsJSONFile.canWrite()) {
                 throw new SecurityException();

@@ -26,7 +26,18 @@ public class StudyGroup implements Comparable<StudyGroup>, Serializable {
         this.toExpelAmount = toExpelAmount;
         this.expelledStudentsAmount = expelledStudentsAmount;
         creationDate = LocalDateTime.now();
+    }
 
+    public StudyGroup (Long groupID, String name, Semester semester, Coordinates coordinates, int studentsCount, Person groupAdmin, Integer toExpelAmount, Integer expelledStudentsAmount, LocalDateTime creationDate){
+        this.id = groupID;
+        this.name = name;
+        this.semester = semester;
+        this.coordinates = coordinates;
+        this.studentsCount = studentsCount;
+        this.groupAdmin = groupAdmin;
+        this.toExpelAmount = toExpelAmount;
+        this.expelledStudentsAmount = expelledStudentsAmount;
+        this.creationDate = creationDate;
     }
 
     @Override

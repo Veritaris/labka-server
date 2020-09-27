@@ -15,11 +15,12 @@ public class InitCommands {
                 "x bigint not null," +
                 "y bigint not null," +
                 "students_amount smallint not null," +
-                "admin_id integer not null," +
+                "admin_hash varchar(32) not null," +
                 "students_to_expel smallint not null," +
                 "expelled_students smallint not null," +
                 "creation_date date not null," +
-                "primary key (admin_id)" +
+                "author varchar(24) not null," +
+                "primary key (admin_hash)" +
                 ");");
         this.commands.put("createAdminTableSQL", "create table if not exists s285604.admins(" +
                 "id integer not null," +
@@ -27,7 +28,8 @@ public class InitCommands {
                 "height numeric(1) not null," +
                 "weight numeric(1) not null," +
                 "name varchar(24) not null," +
-                "foreign key (id) references s285604.study_groups(admin_id) on DELETE cascade" +
+                "admin_hash varchar(32) not null," +
+                "foreign key (admin_hash) references s285604.study_groups(admin_hash) on DELETE cascade" +
                 ");");
         this.commands.put ("createUsersTableSQL", "create table if not exists s285604.users(" +
                 "id integer not null," +
