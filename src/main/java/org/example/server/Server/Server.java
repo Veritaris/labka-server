@@ -1,5 +1,6 @@
 package org.example.server.Server;
 
+import java.io.*;
 import java.nio.channels.DatagramChannel;
 
 import org.example.server.CommandManager.CommandProcessor;
@@ -11,12 +12,18 @@ import org.apache.logging.log4j.core.config.Configurator;
 import java.net.InetSocketAddress;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
-import java.io.IOException;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 @SuppressWarnings({"InfiniteLoopStatement", "FieldCanBeLocal"})
 public class Server {
     private static final Logger logger = LogManager.getLogger();
+
+    private Properties serverConfig = new Properties();
+
+    private final String configPath = "server.properties";
+
+    private InputStream inputStream = null;
 
     public String host;
     public int port;
@@ -33,12 +40,33 @@ public class Server {
 
     private final CommandProcessor commandProcessor = new CommandProcessor();
 
-    public Server(String host, int port) throws IOException {
+    public Server() throws IOException {
         Configurator.initialize(null, "log4j2.xml");
-        logger.info(String.format("Creating server at '%s:%s'...", host, port));
 
-        this.host = host;
-        this.port = port;
+        try {
+            inputStream = new FileInputStream(this.configPath);
+
+        } catch (FileNotFoundException e) {
+            logger.error("Server cannot run without config file, please, create config.properties");
+            System.exit(1);
+        }
+
+        try {
+            serverConfig.load(inputStream);
+        } catch (IOException e) {
+            logger.error("Something went wrong:");
+            logger.error(e.getStackTrace());
+            System.exit(1);
+        }
+
+        this.host = serverConfig.getProperty("server_url");
+        try {
+            this.port = Integer.parseInt(serverConfig.getProperty("server_port"));
+        } catch (NumberFormatException e) {
+            logger.error(String.format("Server port must be int, got '%s'", serverConfig.getProperty("server_port")));
+        }
+
+        logger.info(String.format("Creating server at '%s:%s'...", this.host, this.port));
 
         this.datagramChannel = DatagramChannel.open();
         this.serverAddress = new InetSocketAddress(this.host, this.port);
