@@ -7,4 +7,4 @@ To run project on local machine follow this steps in project directory:
 3. `initdb database`
 4. `pg_ctl -D database/ -l logs/database.log  start`
 
-Now you have local database running. To stop it user `pg_ctl -D database stop`
+Now you have local database running. To stop it use `pg_ctl -D database stop`
