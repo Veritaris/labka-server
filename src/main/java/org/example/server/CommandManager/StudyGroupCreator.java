@@ -28,7 +28,7 @@ public class StudyGroupCreator {
                         } else flag = false;
                     }
                 }
-                Long studentsCount = Long.parseLong(studentsCountString);
+                int studentsCount = Integer.parseInt(studentsCountString);
                 System.out.println("Input group's name");
                 String name = field.nextLine();
 
@@ -225,7 +225,7 @@ public class StudyGroupCreator {
         int shouldBeExpelled = 0;
         int expelledStudents = 0;
         int adminWeightFloat = 0;
-        long studentsCount = 0L;
+        int studentsCount = 0;
         Semester semester = null;
         Person groupAdmin;
         int x = 0;
@@ -239,7 +239,7 @@ public class StudyGroupCreator {
                 System.out.printf("\t[ScriptExecutorError] Students amount must be > 0, got '%s'\n", studentsAmount);
                 errorFlag = true;
             } else {
-                studentsCount = Long.parseLong(studentsAmount);
+                studentsCount = Integer.parseInt(studentsAmount);
             }
         }
 
