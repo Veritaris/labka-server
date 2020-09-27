@@ -1,0 +1,1 @@
+To build project, run `mvn clean compile assembly:single`
