@@ -9,11 +9,10 @@ import server.Exceptions.SameAdminException;
 
 import java.sql.*;
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.UUID;
+import java.util.*;
 
 
-@SuppressWarnings({"FieldCanBeLocal", "DuplicatedCode", "FieldMayBeFinal"})
+@SuppressWarnings({"FieldCanBeLocal", "DuplicatedCode", "FieldMayBeFinal", "UnnecessaryContinue"})
 public class DatabaseManager {
     private static final Logger logger = LogManager.getLogger();
     private ArrayList<StudyGroup> groups;
@@ -21,11 +20,15 @@ public class DatabaseManager {
     private final String username;
     private final String password;
     private final String url;
+    private final String databaseName;
+    private final String driver;
     private final String schemaName;
     private final InitCommands databaseInitCommands;
 
-    public DatabaseManager(String url, String username, String password, String schemaName) {
-        this.url = url;
+    public DatabaseManager(String driver, String url, String databaseName, String username, String password, String schemaName) {
+        this.driver = driver;
+        this.databaseName = databaseName;
+        this.url = String.format("%s://%s/%s", this.driver, url, this.databaseName);
         this.username = username;
         this.password = password;
         this.schemaName = schemaName;
@@ -125,6 +128,30 @@ public class DatabaseManager {
         executeSQL(String.format("delete from %s.study_groups where id=%s", this.schemaName, id));
     }
 
+    public void saveToDB(List<StudyGroup> collection) {
+        logger.info(String.format("Saving %s elements of collection...", collection.size()));
+        String getIDsQuery = "select id from %s.study_groups";
+        HashSet<Long> savedGroupsIDs = new HashSet<>();
+
+        try (Connection dbConnection = DriverManager.getConnection(this.url ,this.username, this.password)){
+            Statement statement = dbConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(String.format(getIDsQuery, this.schemaName));
+            logger.info("Saved!");
+            while (resultSet.next()) {
+                savedGroupsIDs.add(resultSet.getLong("id"));
+            }
+
+            for (StudyGroup group: collection) {
+                if (!savedGroupsIDs.contains(group.getId())) {
+                    continue;
+                }
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public ArrayList<StudyGroup> getAllGroups() {
         String getGroupQuery = String.format("select * from %s.study_groups", this.schemaName);
         try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
@@ -215,8 +242,6 @@ public class DatabaseManager {
         );
 
         executeSQL(updateGroupQuery);
-
-
 
         if (admin_hash.equals(getGroup(id).getGroupAdmin().getPersonHash())) {
             executeSQL(updateAdminQuery);

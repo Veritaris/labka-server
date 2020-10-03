@@ -39,14 +39,14 @@ public class Server {
     private final Receiver messageReceiver;
     private final Sender messageSender;
 
-    private CommandObject receivedCommandObject;
     private CommandObject commandObjectToSend;
-    ExecutorService receiverThreadPool;
-    ExecutorService processThreadPool;
+    private final ExecutorService receiverThreadPool;
+    private final ExecutorService processThreadPool;
 
     private final String dbUsername;
     private final String dbPassword;
     private final String dbURL;
+    private final String dbDriver;
     private final String dbName;
     private final String dbSchemaName;
 
@@ -83,9 +83,9 @@ public class Server {
         this.dbUsername = serverConfig.getProperty("database_user");
         this.dbPassword = serverConfig.getProperty("database_password");
         this.dbURL = serverConfig.getProperty("database_url");
+        this.dbDriver = serverConfig.getProperty("database_driver");
         this.dbName = serverConfig.getProperty("database_name");
         this.dbSchemaName = serverConfig.getProperty("schema_name");
-
 
         logger.info(String.format("Creating server at '%s:%s'...", this.host, this.port));
 
@@ -93,7 +93,7 @@ public class Server {
                 "Connecting to database at '%s' with credentials: username='%s', password='%s'...",
                 this.dbURL, this.dbUsername, new String(new char[this.dbPassword.length()]).replace('\0', '*')
         ));
-        databaseManager = new DatabaseManager(this.dbURL, this.dbUsername, this.dbPassword, this.dbSchemaName);
+        databaseManager = new DatabaseManager(this.dbDriver, this.dbURL, this.dbName, this.dbUsername, this.dbPassword, this.dbSchemaName);
         databaseManager.init();
         logger.info("Connected.");
 

@@ -28,10 +28,6 @@ public class Authorization {
         return DigestUtils.md5Hex(rawPassword);
     }
 
-    private String hashUser(String username, String rawPassword) {
-        return DigestUtils.md5Hex(String.format("%salt%s", username, rawPassword));
-    }
-
     public String loginUser(String username, String rawPassword) {
         User userToLogin = new User(username, rawPassword);
 
@@ -72,18 +68,10 @@ public class Authorization {
     }
 
     public boolean isAuthenticated(User user) {
-
-        boolean k = this.authenticatedUsers.contains(user.getToken());
-        String s = user.getToken();
         return this.authenticatedUsers.contains(user.getToken());
     }
 
     public boolean hasPermissionToEdit(User user, Long groupID) {
         return this.databaseManager.getGroupAuthor(groupID).equals(user.getUsername());
     }
-
-    public void setDatabaseManager(DatabaseManager databaseManager) {
-        this.databaseManager = databaseManager;
-    }
-
 }

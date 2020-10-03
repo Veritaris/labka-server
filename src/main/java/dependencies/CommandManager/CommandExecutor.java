@@ -28,8 +28,8 @@ public class CommandExecutor {
 
     private Date creationDate;
 
-
     public CommandExecutor(DatabaseManager databaseManager, Authorization authLib) {
+        Runtime.getRuntime().addShutdownHook(new Thread(this::saveCollectionToDB));
         this.databaseManager = databaseManager;
         this.authLib = authLib;
         creationDate = new Date();
@@ -57,6 +57,10 @@ public class CommandExecutor {
             logger.error("File with commands not found!");
             System.exit(1);
         }
+    }
+
+    public void saveCollectionToDB() {
+        this.databaseManager.saveToDB(this.groups);
     }
 
     public void sortGroups() {
@@ -93,6 +97,9 @@ public class CommandExecutor {
     public ArrayList<String> show() {
         message.clear();
         groups.stream().forEachOrdered((p) -> message.add(p.toString()));
+        if (message.size() == 0) {
+            message.add("Collection is empty");
+        }
         return message;
     }
 
@@ -143,6 +150,7 @@ public class CommandExecutor {
                         group.getStudentsCount(), group.getGroupAdmin().getNationality(), group.getGroupAdmin().getHeight(),
                         group.getGroupAdmin().getWeight(), group.getGroupAdmin().getName(), group.getToExpelAmount(), group.getExpelledStudentsAmount()
                 );
+                this.groups = this.databaseManager.getAllGroups();
                 message.add(String.format("Group with id '%s' was successfully updated", group.getId()));
             } else {
                 message.add("Sorry, you do not have permission to edit this group");
@@ -184,10 +192,6 @@ public class CommandExecutor {
     private void loadCollection() {
         groups = databaseManager.getAllGroups();
         logger.info("Collection uploaded.");
-    }
-
-    private PriorityQueue<StudyGroup> differencesForGroup() {
-        return null;
     }
 
     public ArrayList<String> exit() {
