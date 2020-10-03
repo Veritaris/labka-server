@@ -6,5 +6,7 @@ To run project on local machine follow this steps in project directory:
 2. `mkdir database`
 3. `initdb database`
 4. `pg_ctl -D database/ -l logs/database.log  start`
+5. `java -jar server.jar <path_to_server_properties>`
+
 
 Now you have local database running. To stop it use `pg_ctl -D database stop`
