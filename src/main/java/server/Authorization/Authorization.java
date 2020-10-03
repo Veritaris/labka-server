@@ -44,7 +44,7 @@ public class Authorization {
                 return "You was logged in";
             }
         }
-        return "400";
+        return "Wrong login or password";
     }
 
     public String logoutUser(User user) {
@@ -55,7 +55,7 @@ public class Authorization {
         return "You has been logged out.";
     }
 
-    public String createUser(String username, String rawPassword) {
+    public String registerUser(String username, String rawPassword) {
         if (this.databaseManager.getUser(username) == null) {
             if (this.databaseManager.addUser(username, hashPassword(rawPassword), UUID.randomUUID())) {
                 logger.info(

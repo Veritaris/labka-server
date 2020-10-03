@@ -8,10 +8,10 @@ import dependencies.Collection.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import server.DatabaseManager.DatabaseManager;
+import server.Exceptions.SameAdminException;
 
 import java.io.*;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.*;
 
 @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal", "Convert2MethodRef", "SimplifyStreamApiCallChains", "AccessStaticViaInstance"})
@@ -110,19 +110,24 @@ public class CommandExecutor {
 
     public ArrayList<String> register(String username, String rawPassword) {
         message.clear();
-        message.add(authLib.createUser(username, rawPassword));
+        message.add(authLib.registerUser(username, rawPassword));
         return message;
     }
 
     public ArrayList<String> addStudyGroup(StudyGroup group, String author) {
-        databaseManager.addGroup(
-                group.getName(), group.getSemester(), group.getCoordinates().getX(), group.getCoordinates().getY(),
-                group.getStudentsCount(), group.getGroupAdmin().getNationality(), group.getGroupAdmin().getHeight(),
-                group.getGroupAdmin().getWeight(), group.getGroupAdmin().getName(), group.getToExpelAmount(), group.getExpelledStudentsAmount(), LocalDate.now(), author
-        );
-        groups = databaseManager.getAllGroups();
-        sortGroups();
-        message.add("Element added.");
+        message.clear();
+        try {
+            databaseManager.addGroup(
+                    group.getName(), group.getSemester(), group.getCoordinates().getX(), group.getCoordinates().getY(),
+                    group.getStudentsCount(), group.getGroupAdmin().getNationality(), group.getGroupAdmin().getHeight(),
+                    group.getGroupAdmin().getWeight(), group.getGroupAdmin().getName(), group.getToExpelAmount(), group.getExpelledStudentsAmount(), LocalDate.now(), author
+            );
+            groups = databaseManager.getAllGroups();
+            sortGroups();
+            message.add("Element added.");
+        } catch (SameAdminException e) {
+            message.add("Cannot create group with this admin: he is already related to another group");
+        }
         return message;
     }
 

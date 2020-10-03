@@ -5,6 +5,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import dependencies.Collection.*;
+import server.Exceptions.SameAdminException;
 
 import java.sql.*;
 import java.time.LocalDate;
@@ -33,7 +34,7 @@ public class DatabaseManager {
         logger.info(String.format("%s init commands has been loaded", databaseInitCommands.getCommands().size()));
     }
 
-    public void executeSQL(String sqlString){
+    public void executeSQL(String sqlString) {
         try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password); Statement targetStatement = dbConnection.createStatement()) {
             try {
                 targetStatement.execute(sqlString);
@@ -64,8 +65,8 @@ public class DatabaseManager {
     }
 
     public void init() {
-        for (String schemaName: databaseInitCommands.getCommands().keySet()) {
-            executeSQL(databaseInitCommands.getCommands().get(schemaName));
+        for (String query: databaseInitCommands.getCommands().keySet()) {
+            executeSQL(String.format(databaseInitCommands.getCommands().get(query), this.schemaName, this.schemaName));
         }
     }
 
@@ -102,10 +103,10 @@ public class DatabaseManager {
     }
 
     public String getGroupAuthor(Long id) {
-        String getGroupSQL = String.format("select * from %s.study_groups where id='%s'", this.schemaName, id);
+        String getGroupQuery = String.format("select * from %s.study_groups where id='%s'", this.schemaName, id);
         try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
             Statement statement = dbConnection.createStatement();
-            ResultSet resultSet = statement.executeQuery(getGroupSQL);
+            ResultSet resultSet = statement.executeQuery(getGroupQuery);
 
             if (resultSet.next()) {
                 return resultSet.getString("author");
@@ -125,10 +126,10 @@ public class DatabaseManager {
     }
 
     public ArrayList<StudyGroup> getAllGroups() {
-        String getGroupSQL = String.format("select * from %s.study_groups", this.schemaName);
+        String getGroupQuery = String.format("select * from %s.study_groups", this.schemaName);
         try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
             Statement statement = dbConnection.createStatement();
-            ResultSet resultSet = statement.executeQuery(getGroupSQL);
+            ResultSet resultSet = statement.executeQuery(getGroupQuery);
             groups = new ArrayList<>();
 
             while (resultSet.next()) {
@@ -142,10 +143,10 @@ public class DatabaseManager {
     }
 
     public StudyGroup getGroup(Long id) {
-        String getGroupSQL = String.format("select * from %s.study_groups where id='%s'", this.schemaName, id);
+        String getGroupQuery = String.format("select * from %s.study_groups where id='%s'", this.schemaName, id);
         try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
             Statement statement = dbConnection.createStatement();
-            ResultSet resultSet = statement.executeQuery(getGroupSQL);
+            ResultSet resultSet = statement.executeQuery(getGroupQuery);
 
             if (resultSet.next()) {
                 return constructStudyGroup(resultSet);
@@ -156,31 +157,44 @@ public class DatabaseManager {
         return null;
     }
 
-    public void addGroup(String name, Semester semester, Long x, Long y, Integer students_amount, Country nationality, Double height, Integer weight, String adminName, Integer students_to_expel, Integer expelled_students, LocalDate creation_date, String author) {
+    public void addGroup(String name, Semester semester, Long x, Long y, Integer students_amount, Country nationality,
+                         Double height, Integer weight, String adminName, Integer students_to_expel, Integer expelled_students, LocalDate creation_date,
+                         String author) throws SameAdminException{
 
         String admin_hash = DigestUtils.md5Hex(String.format("%s%s%s%s", nationality, height, weight, adminName));
-        String addAdminSQL = String.format(
+        String addAdminQuery = String.format(
                 "insert into %s.admins values (nextval('%s.admin_id_seq'), '%s', '%s', '%s', '%s', '%s')",
                 this.schemaName, this.schemaName, nationality, height, weight, adminName, admin_hash
         );
-        String addGroupSQL = String.format(
+        String addGroupQuery = String.format(
                 "insert into %s.study_groups values (nextval('%s.study_groups_id_seq'), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
                 this.schemaName, this.schemaName, name, semester, x, y, students_amount, admin_hash, students_to_expel, expelled_students, creation_date, author
         );
 
-        executeSQL(addGroupSQL);
-        executeSQL(addAdminSQL);
+        try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
+            Statement statement = dbConnection.createStatement();
+            ResultSet resultSet = statement.executeQuery(String.format("select admin_hash from %s.study_groups where admin_hash='%s'", this.schemaName, admin_hash));
+
+            if (resultSet.next()) {
+                throw new SameAdminException("Admin can be related only to one group");
+            } else {
+                executeSQL(addGroupQuery);
+                executeSQL(addAdminQuery);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void updateGroup(Long id, String name, Semester semester, Long x, Long y, Integer students_amount, Country nationality, Double height, Integer weight, String adminName, Integer students_to_expel, Integer expelled_students) {
 
         String admin_hash = DigestUtils.md5Hex(String.format("%s%s%s%s", nationality, height, weight, adminName));
 
-        String updateAdminSQL = String.format(
-                "update %s.admins set (nextval('%s.admin_id_seq'), '%s', '%s', '%s', '%s')",
-                this.schemaName, this.schemaName, nationality, height, weight, adminName
+        String updateAdminQuery = String.format(
+                "insert into %s.admins values (nextval('%s.admin_id_seq'), '%s', '%s', '%s', '%s', '%s')",
+                this.schemaName, this.schemaName, nationality, height, weight, adminName, admin_hash
         );
-        String updateGroupSQL = String.format(
+        String updateGroupQuery = String.format(
                         "update %s.study_groups set " +
                                 "name='%s'," +
                                 "semester='%s'," +
@@ -193,28 +207,29 @@ public class DatabaseManager {
                                 this.schemaName, name, semester, x, y, students_amount,
                                 students_to_expel, expelled_students, id
                         );
-        String updateGroupAdminSQL = String.format(
+        String updateGroupAdminQuery = String.format(
                 "update %s.study_groups set " +
                         "admin_hash='%s' " +
                         "where id='%s'",
                 this.schemaName, admin_hash, id
         );
 
-        executeSQL(updateGroupSQL);
-        System.out.println(admin_hash);
-        System.out.println(getAdmin(admin_hash).getPersonHash());
-        if (admin_hash.equals(getAdmin(admin_hash).getPersonHash())) {
-            executeSQL(updateAdminSQL);
-            executeSQL(updateGroupAdminSQL);
+        executeSQL(updateGroupQuery);
+
+
+
+        if (admin_hash.equals(getGroup(id).getGroupAdmin().getPersonHash())) {
+            executeSQL(updateAdminQuery);
+            executeSQL(updateGroupAdminQuery);
         }
     }
 
     private Person getAdmin(String adminHash) {
         Person admin = null;
-        String getUserSQL = String.format("select * from %s.admins where admin_hash='%s'", this.schemaName, adminHash);
+        String getUserQuery = String.format("select * from %s.admins where admin_hash='%s'", this.schemaName, adminHash);
         try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
             Statement statement = dbConnection.createStatement();
-            ResultSet resultSet = statement.executeQuery(getUserSQL);
+            ResultSet resultSet = statement.executeQuery(getUserQuery);
 
             if (resultSet.next()) {
                 Country nationality = Country.valueOf(resultSet.getString("nationality"));

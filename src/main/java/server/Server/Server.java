@@ -3,6 +3,7 @@ package server.Server;
 import java.io.*;
 import java.nio.channels.DatagramChannel;
 
+import dependencies.CommandManager.CommandObjectCreator;
 import server.Authorization.Authorization;
 import dependencies.CommandManager.CommandObject;
 import dependencies.CommandManager.CommandProcessor;
@@ -23,7 +24,7 @@ public class Server {
 
     private final Properties serverConfig = new Properties();
 
-    private final String configPath = "server.properties";
+    private final String configPath;
     private Authorization authLib;
 
     private InputStream inputStream = null;
@@ -52,8 +53,9 @@ public class Server {
     private final DatabaseManager databaseManager;
     private final CommandProcessor commandProcessor;
 
-    public Server() throws IOException {
+    public Server(String propertyPath) throws IOException {
         Configurator.initialize(null, "log4j2.xml");
+        this.configPath = propertyPath;
 
         try {
             inputStream = new FileInputStream(this.configPath);
@@ -121,6 +123,7 @@ public class Server {
             try {
                 commandObjectToSend = processThreadPool.submit(() -> commandProcessor.processCommandThread(receivedCommandObject.get())).get();
             } catch (ExecutionException e) {
+                commandObjectToSend = CommandObjectCreator.createErrorObject("500", "Something went wrong. Please, retry later");
                 logger.error(e.getMessage());
                 for (StackTraceElement stacktraceLine : e.getStackTrace()) {
                     logger.error(String.format("\t%s",stacktraceLine));

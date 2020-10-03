@@ -9,28 +9,13 @@ import server.DatabaseManager.DatabaseManager;
 public class CommandProcessor {
     private CommandObject commandObjectToSend;
     public CommandExecutor commandExecutor;
-    private DatabaseManager databaseManager;
-    private Authorization authLib;
+    private final Authorization authLib;
     private String command;
     private User user;
-//    private ExecutorService processThreadPool;
 
     public CommandProcessor(DatabaseManager databaseManager, Authorization authLib) {
-        this.databaseManager = databaseManager;
         this.authLib = authLib;
         this.commandExecutor = new CommandExecutor(databaseManager, authLib);
-//        processThreadPool = Executors.newFixedThreadPool(8);
-    }
-
-//    public CommandObject processCommand (CommandObject receivedCommandObject) throws ExecutionException, InterruptedException {
-//        CommandObject commandObjectToSend = processThreadPool.execute(processCommandThread).get();
-//
-//    };
-
-    public void init(DatabaseManager databaseManager, Authorization authorization) {
-        this.databaseManager = databaseManager;
-        this.authLib = authorization;
-        this.authLib.setDatabaseManager(this.databaseManager);
     }
 
     public CommandObject processCommandThread(CommandObject receivedCommandObject){
