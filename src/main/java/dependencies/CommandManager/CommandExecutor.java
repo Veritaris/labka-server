@@ -2,6 +2,7 @@ package dependencies.CommandManager;
 
 
 import dependencies.UserAuthorization.User;
+import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 import server.Authorization.Authorization;
 import dependencies.Collection.*;
 
@@ -21,7 +22,10 @@ public class CommandExecutor {
 
     private List<StudyGroup> groups = Collections.synchronizedList(new ArrayList<>());
     private String[][] availableCommands = new String[16][1];
-    private ArrayList<String> message = new ArrayList<>();
+    private HashMap<String, String> message = new HashMap<String, String>(){{
+        put("status", "");
+        put("message", "");
+    }};
     public ArrayList<String> history = new ArrayList<>();
     private static CommandExecutor commandExecutor;
     private static Authorization authLib;
@@ -69,17 +73,22 @@ public class CommandExecutor {
         groups = groupPriorityQueue;
     }
 
-    public ArrayList<String> help() {
+    public HashMap<String, String> help() {
         message.clear();
+        message.put("status", "200");
+        StringBuilder m = new StringBuilder();
         for (int i = 0; i<15; i++) {
-            message.add(String.format("* %s - %s", availableCommands[i][0], availableCommands[i][1]));
+            m.append(String.format("* %s - %s\n", availableCommands[i][0], availableCommands[i][1]));
         }
+        message.put("message", m.toString());
         return message;
     }
 
-    public ArrayList<String> info(User user) {
+    public HashMap<String, String> info(User user) {
         message.clear();
-        message.add(
+        message.put("status", "200");
+        message.put(
+                "message",
                 String.format(
                         "Collection type: %s\n" +
                                 "Creation date: %s\n" +
@@ -94,34 +103,41 @@ public class CommandExecutor {
         return message;
     }
 
-    public ArrayList<String> show() {
+    public HashMap<String, String> show() {
         message.clear();
-        groups.stream().forEachOrdered((p) -> message.add(p.toString()));
+        message.put("status", "200");
+
+        final String[] m = {""};
+        groups.stream().forEachOrdered((p) -> {
+            m[0] += p.toString();
+        });
+
+        message.put("message", m[0]);
         if (message.size() == 0) {
-            message.add("Collection is empty");
+            message.put("message", "Collection is empty");
         }
         return message;
     }
 
-    public ArrayList<String> login(String username, String rawPassword) {
+    public HashMap<String, String> login(String username, String rawPassword) {
         message.clear();
-        message.add(authLib.loginUser(username, rawPassword));
+        message = authLib.loginUser(username, rawPassword);
         return message;
     }
 
-    public ArrayList<String> logout(String username, String rawPassword) {
+    public HashMap<String, String> logout(String username, String rawPassword) {
         message.clear();
-        message.add(authLib.logoutUser(new User(username, rawPassword)));
+        message = authLib.logoutUser(new User(username, rawPassword));
         return message;
     }
 
-    public ArrayList<String> register(String username, String rawPassword) {
+    public HashMap<String, String> register(String username, String rawPassword) {
         message.clear();
-        message.add(authLib.registerUser(username, rawPassword));
+        message = authLib.registerUser(username, rawPassword);
         return message;
     }
 
-    public ArrayList<String> addStudyGroup(StudyGroup group, String author) {
+    public HashMap<String, String> addStudyGroup(StudyGroup group, String author) {
         message.clear();
         try {
             databaseManager.addGroup(
@@ -131,18 +147,21 @@ public class CommandExecutor {
             );
             groups = databaseManager.getAllGroups();
             sortGroups();
-            message.add("Element added.");
+            message.put("status", "201");
+            message.put("message", "Element added");
         } catch (SameAdminException e) {
-            message.add("Cannot create group with this admin: he is already related to another group");
+            message.put("status", "400");
+            message.put("message", "Group with given admin already exists");
         }
         return message;
     }
 
-    public ArrayList<String> updateStudyGroup(StudyGroup group, User user) {
+    public HashMap<String, String> updateStudyGroup(StudyGroup group, User user) {
         message.clear();
 
         if (databaseManager.getGroup(group.getId()) == null) {
-            message.add("Group with given id doesn't exist!");
+            message.put("status", "404");
+            message.put("message", "Group with given id doesn't exist!");
         } else {
             if (authLib.hasPermissionToEdit(user, group.getId())) {
                 databaseManager.updateGroup(
@@ -151,15 +170,17 @@ public class CommandExecutor {
                         group.getGroupAdmin().getWeight(), group.getGroupAdmin().getName(), group.getToExpelAmount(), group.getExpelledStudentsAmount()
                 );
                 this.groups = this.databaseManager.getAllGroups();
-                message.add(String.format("Group with id '%s' was successfully updated", group.getId()));
+                message.put("status", "200");
+                message.put("message", "updated");
             } else {
-                message.add("Sorry, you do not have permission to edit this group");
+                message.put("status", "403");
+                message.put("message", "Permission denied");
             }
         }
         return message;
     }
 
-    public ArrayList<String> remove_by_id(Long id, User user) {
+    public HashMap<String, String> remove_by_id(Long id, User user) {
         message.clear();
         boolean foundFlag = false;
         for (StudyGroup studyGroup : groups) {
@@ -168,24 +189,28 @@ public class CommandExecutor {
                     groups.remove(studyGroup);
                     foundFlag = true;
                     databaseManager.deleteById(id);
-                    message.add(String.format("Group with id '%s' was deleted", id));
+                    message.put("status", "200");
+                    message.put("message", String.format("Group with id '%s' was deleted", id));
                 } else {
-                    message.add("Sorry, you do not have permission to edit this group");
+                    message.put("status", "403");
+                    message.put("message", "Permission denied");
                 }
                 break;
             }
         }
         if (!foundFlag) {
-            message.add("Element with given id doesn't exist!");
+            message.put("status", "404");
+            message.put("message", "Element with given id doesn't exist!");
         }
         return message;
     }
 
-    public ArrayList<String> clearCollection(User user) {
+    public HashMap<String, String> clearCollection(User user) {
         message.clear();
         databaseManager.clearAll(user);
         groups.clear();
-        message.add("Collection cleared.");
+        message.put("status", "200");
+        message.put("message", "Collection cleared");
         return message;
     }
 
@@ -194,15 +219,16 @@ public class CommandExecutor {
         logger.info("Collection uploaded.");
     }
 
-    public ArrayList<String> exit() {
+    public HashMap<String, String> exit() {
         message.clear();
         history.clear();
-        message.add("Completion of work...");
+        message.put("status", "200");
+        message.put("message", "Completition of work...");
 
         return message;
     }
 
-    public ArrayList<String> remove_first(User user) {
+    public HashMap<String, String> remove_first(User user) {
         message.clear();
         try {
             if (groups.isEmpty()) {
@@ -213,31 +239,44 @@ public class CommandExecutor {
 
             if (authLib.hasPermissionToEdit(user, studyGroup.getId())) {
                 databaseManager.deleteById(studyGroup.getId());
-                message.add("Element removed.");
+                message.put("status", "200");
+                message.put("message", "Element removed");
             } else {
-                message.add("Sorry, you do not have permission to edit this group");
+                message.put("status", "403");
+                message.put("message", "Permission denied");
             }
         } catch (NoSuchElementException e) {
-            message.add("Collection is empty");
+            message.put("status", "404");
+            message.put("message", "No such element");
         }
         return message;
     }
 
-    public ArrayList<String> head() {
+    public HashMap<String, String> head() {
         message.clear();
         try {
             if (groups.isEmpty()) {
                 throw new NoSuchElementException();
             }
-            message.add(String.format("Element is output: %s", groups.get(0)));
+            message.put("status", "200");
+            message.put("message", String.format("Elements are: %s", groups.get(0)));
         } catch (NoSuchElementException e) {
-            message.add("Collection is empty!");
+            message.put("status", "404");
+            message.put("message", "No such element");
         }
         return message;
     }
 
-    public ArrayList<String> getHistory() {
-        return this.history;
+    public HashMap<String, String> getHistory() {
+        message.clear();
+        StringBuilder m = new StringBuilder();
+        for (String c: this.history
+             ) {
+            m.append(c);
+        }
+        message.put("status", "200");
+        message.put("message", m.toString());
+        return message;
     }
 
     public void addToHistory(String commandName) {
@@ -247,20 +286,24 @@ public class CommandExecutor {
         this.history.add(commandName);
     }
 
-    public ArrayList<String> filter_contains_name(String str) {
+    public HashMap<String, String> filter_contains_name(String str) {
         message.clear();
         groups.stream().filter(
                 studyGroup -> studyGroup.getName().contains(str)).forEachOrdered(
-                        studyGroup -> message.add(studyGroup.toString())
+                        studyGroup -> {
+                            message.put("status", "200");
+                            message.put("message", studyGroup.toString());
+                        }
         );
 
         if (message.isEmpty()) {
-            message.add("No matches found!");
+            message.put("status", "400");
+            message.put("message", "No such element");
         }
         return message;
     }
 
-    public ArrayList<String> max_by_expelled_students() {
+    public HashMap<String, String> max_by_expelled_students() {
         message.clear();
         try {
             if (groups.isEmpty()) {
@@ -277,14 +320,16 @@ public class CommandExecutor {
                 }
             }
             assert studyGroupMax != null;
-            message.add(studyGroupMax.toString());
+            message.put("status", "200");
+            message.put("message", studyGroupMax.toString());
         } catch (NoSuchElementException e) {
-            message.add("Collection is empty!");
+            message.put("status", "404");
+            message.put("message", "No such element");
         }
         return message;
     }
 
-    public ArrayList<String> filter_by_group_admin(String fieldsGroupAdmin) {
+    public HashMap<String, String> filter_by_group_admin(String fieldsGroupAdmin) {
         message.clear();
 
         boolean foundFlag = false;
@@ -299,13 +344,15 @@ public class CommandExecutor {
 
         for (StudyGroup studyGroup: groups) {
             if (studyGroup.getGroupAdmin().equals(groupAdmin)) {
-                message.add(studyGroup.toString());
+                message.put("status", "200");
+                message.put("message", studyGroup.toString());
                 foundFlag = true;
             }
         }
 
         if (!foundFlag) {
-            message.add("No matches found!");
+            message.put("status", "404");
+            message.put("message", "No such element");
         }
 
         return message;

@@ -1,6 +1,6 @@
 package dependencies.Commands;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MaxByExpelledStudentsCommand extends Commands{
 
@@ -9,7 +9,7 @@ public class MaxByExpelledStudentsCommand extends Commands{
         this.name = name;
     }
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.max_by_expelled_students();
     }
 }

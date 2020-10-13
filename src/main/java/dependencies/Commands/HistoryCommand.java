@@ -1,8 +1,7 @@
 package dependencies.Commands;
 
 import dependencies.CommandManager.CommandExecutor;
-
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HistoryCommand extends Commands{
     private final CommandExecutor commandExecutor;
@@ -13,7 +12,7 @@ public class HistoryCommand extends Commands{
     }
 
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return commandExecutor.getHistory();
     }
 }

@@ -2,7 +2,7 @@ package dependencies.Commands;
 
 import dependencies.UserAuthorization.User;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class ClearCommand extends Commands {
 
@@ -14,7 +14,7 @@ public class ClearCommand extends Commands {
     }
 
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.clearCollection(this.user);
      }
 }

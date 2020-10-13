@@ -5,13 +5,15 @@ import dependencies.Collection.StudyGroup;
 import dependencies.UserAuthorization.User;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.util.HashMap;
 
 @SuppressWarnings("UnusedReturnValue")
 public class CommandObject implements Serializable {
 
-    private ArrayList<String> message;
+    private HashMap<String, String> body = new HashMap<String, String>(){{
+        put("status", "");
+        put("message", "");
+    }};
     private StudyGroup studyGroup;
     private String stringArgument;
     private Long groupID;
@@ -48,12 +50,12 @@ public class CommandObject implements Serializable {
         this.user = new User(username, rawPassword);
     }
 
-    public void setMessage(ArrayList<String> message){
-        this.message = message;
+    public HashMap<String, String> getBody() {
+        return this.body;
     }
 
-    public ArrayList<String> getMessage() {
-        return this.message;
+    public void setBody(HashMap<String, String> body) {
+        this.body = body;
     }
 
     public String getName() {
@@ -92,12 +94,6 @@ public class CommandObject implements Serializable {
         this.failReason = failReason;
     }
 
-    public void clearMessage() {
-        if (this.message != null) {
-            this.message = new ArrayList<>();
-        }
-    }
-
     public void setSender(User user) {
         this.user = user;
     }
@@ -113,7 +109,6 @@ public class CommandObject implements Serializable {
                 ((getStudyGroup() != null) ? String.format(", firstArgument='%s'", getStudyGroup()) : "") +
                 ((getGroupID() != null) ? String.format(", secondArgument='%s'", getGroupID()) : "") +
                 ((getStringArgument() != null) ? String.format(", thirdArgument='%s'", getStringArgument()) : "") +
-                ((getMessage() != null) ? String.format(", message='%s'", getMessage()) : "") +
                 (String.format(", %s", getSender().toString())) +
                 ">";
 
@@ -125,10 +120,5 @@ public class CommandObject implements Serializable {
 
     public void setScripted(boolean scripted) {
         this.isScripted = scripted;
-    }
-
-    public CommandObject setStringMessage(String message) {
-        this.message = new ArrayList<>(Collections.singleton(message));
-        return this;
     }
 }

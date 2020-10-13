@@ -1,6 +1,7 @@
 package dependencies.CommandManager;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal"})
@@ -95,10 +96,14 @@ public class CommandObjectCreator {
         }
     }
 
-    public static CommandObject createErrorObject(String objectName, String failReason) {
-        commandObject = new CommandObject(objectName);
+    public static CommandObject createErrorObject(String errorCode, String errorDescription) {
+        commandObject = new CommandObject(errorCode);
         commandObject.setIsFailed(true);
-        commandObject.setFailReason(failReason);
+        commandObject.setFailReason(errorDescription);
+        commandObject.setBody(new HashMap<String, String>(){{
+            put("status", String.format("%s", errorCode));
+            put("message", String.format("%s", errorDescription));
+        }});
         return commandObject;
     }
 

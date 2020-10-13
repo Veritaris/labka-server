@@ -1,7 +1,7 @@
 package dependencies.Commands;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public interface CommandInterface {
-    ArrayList<String> execute();
+    HashMap<String, String> execute();
 }

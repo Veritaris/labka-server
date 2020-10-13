@@ -3,7 +3,7 @@ package dependencies.Commands;
 
 import dependencies.UserAuthorization.User;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RegisterCommand extends Commands{
     private final String username;
@@ -16,7 +16,7 @@ public class RegisterCommand extends Commands{
     }
 
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.register(this.username, this.rawPassword);
     }
 }

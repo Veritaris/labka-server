@@ -22,127 +22,114 @@ public class CommandProcessor {
         command = receivedCommandObject.getName();
         user = receivedCommandObject.getSender();
 
+        if (command.equals("connect")) {
+            return new CommandObject("connected");
+        }
+
         if (!authLib.isAuthenticated(user)) {
             commandObjectToSend = new CommandObject(command);
             switch (command) {
                 case "register":
-                    commandObjectToSend.setMessage(
-                            new RegisterCommand(command, user).execute()
-                    );
+                    commandObjectToSend.setBody(new RegisterCommand(command, user).execute());
                     return commandObjectToSend;
 
                 case "login":
-                    commandObjectToSend.setMessage(
-                            new LoginCommand(command, user).execute()
-                    );
+                    commandObjectToSend.setBody(new LoginCommand(command, user).execute());
                     return commandObjectToSend;
                 default:
-                    return CommandObjectCreator.createErrorObject("401", "User not authorized").setStringMessage("Unauthorised");
+                    return CommandObjectCreator.createErrorObject("401", "User not authorized");
             }
         }
 
-        receivedCommandObject.clearMessage();
         commandObjectToSend = new CommandObject(command);
 
         switch (command) {
-            case "register":
-                commandObjectToSend.setMessage(
-                        new RegisterCommand(command, user).execute()
-                );
-                break;
-
-            case "login":
-                commandObjectToSend.setMessage(
-                        new LoginCommand(command, user).execute()
-                );
-                break;
-
             case "logout":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new LogoutCommand(command, user).execute()
                 );
                 break;
 
             case "add":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new AddCommand(command, receivedCommandObject.getStudyGroup(), user.getUsername()).execute()
                 );
                 break;
 
             case "clear":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new ClearCommand(command, user).execute()
                 );
                 break;
 
             case "exit":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new ExitCommand(command).execute()
                 );
                 break;
 
             case "filter_by_group_admin":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new FilterByGroupAdminCommand(command, receivedCommandObject.getStringArgument()).execute()
                 );
                 break;
 
             case "filter_contains_name":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new FilterContainsNameCommand(command, receivedCommandObject.getStringArgument()).execute()
                 );
                 break;
 
             case "head":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new HeadCommand(command).execute()
                 );
                 break;
 
             case "help":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new HelpCommand(command).execute()
                 );
                 break;
 
             case "history":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new HistoryCommand(command, this.commandExecutor).execute()
                 );
                 break;
 
             case "info":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new InfoCommand(command, user).execute()
                 );
                 break;
 
             case "max_by_expelled_students":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new MaxByExpelledStudentsCommand(command).execute()
                 );
                 break;
 
             case "remove_by_id":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new RemoveByIdCommand(command, receivedCommandObject.getGroupID(), user).execute()
                 );
                 break;
 
             case "remove_first":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new RemoveFirstCommand(command, user).execute()
                 );
                 break;
 
             case "show":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new ShowCommand(command).execute()
                 );
                 break;
 
             case "update":
-                commandObjectToSend.setMessage(
+                commandObjectToSend.setBody(
                         new UpdateCommand(command, receivedCommandObject.getStudyGroup(), user).execute()
                 );
                 break;

@@ -2,7 +2,7 @@ package dependencies.Commands;
 
 import dependencies.UserAuthorization.User;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class LoginCommand extends Commands{
     private final String username;
@@ -15,7 +15,7 @@ public class LoginCommand extends Commands{
     }
 
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.login(username, rawPassword);
     }
 }

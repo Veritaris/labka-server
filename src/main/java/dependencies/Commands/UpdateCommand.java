@@ -3,7 +3,7 @@ package dependencies.Commands;
 import dependencies.Collection.StudyGroup;
 import dependencies.UserAuthorization.User;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class UpdateCommand extends Commands{
     private final User user;
@@ -16,7 +16,7 @@ public class UpdateCommand extends Commands{
         this.user = user;
     }
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.updateStudyGroup(studyGroup, user);
     }
 }

@@ -2,7 +2,7 @@ package dependencies.Commands;
 
 import dependencies.UserAuthorization.User;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class InfoCommand extends Commands{
 
@@ -14,7 +14,7 @@ public class InfoCommand extends Commands{
     }
 
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.info(user);
     }
 }

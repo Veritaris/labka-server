@@ -7,6 +7,7 @@ import org.apache.logging.log4j.Logger;
 import server.DatabaseManager.DatabaseManager;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
 
@@ -15,6 +16,10 @@ public class Authorization {
     private static final Logger logger = LogManager.getLogger();
     private HashSet<String> authenticatedUsers;
     private DatabaseManager databaseManager;
+    private HashMap<String, String> response = new HashMap<String, String>(){{
+        put("status", "");
+        put("message", "");
+    }};
 
     public Authorization(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
@@ -28,43 +33,54 @@ public class Authorization {
         return DigestUtils.md5Hex(rawPassword);
     }
 
-    public String loginUser(String username, String rawPassword) {
+    public HashMap<String, String> loginUser(String username, String rawPassword) {
+        System.out.printf("%s, %s\n", username, rawPassword);
         User userToLogin = new User(username, rawPassword);
 
         if (this.databaseManager.getUser(username) != null){
             if (userToLogin.equals(this.databaseManager.getUser(username))) {
                 this.authenticatedUsers.add(userToLogin.getToken());
                 logger.info(
-                        String.format("User '%s' signed in at '%s' from ip ''", username, LocalDateTime.now())
+                        String.format("User '%s' signed in at '%s'", username, LocalDateTime.now())
                 );
-                return "You was logged in";
+                response.put("status", "200");
+                response.put("message", "Logged in");
+                return response;
             }
         }
-        return "Wrong login or password";
+        response.put("status", "401");
+        response.put("message", "Wrong login or password");
+        return response;
     }
 
-    public String logoutUser(User user) {
+    public HashMap<String, String> logoutUser(User user) {
         this.authenticatedUsers.remove(user.getToken());
         logger.info(
                 String.format("User '%s' logged out at '%s'", user.getUsername(), LocalDateTime.now())
         );
-        return "You has been logged out.";
+        response.put("status", "200");
+        response.put("message", "Logged out");
+        return response;
     }
 
-    public String registerUser(String username, String rawPassword) {
+    public HashMap<String, String> registerUser(String username, String rawPassword) {
         if (this.databaseManager.getUser(username) == null) {
             if (this.databaseManager.addUser(username, hashPassword(rawPassword), UUID.randomUUID())) {
                 logger.info(
                         String.format("User '%s' was created", username)
                 );
-                loginUser(username, rawPassword);
-                return String.format("User '%s' was successfully created", username);
+                response.put("status", "200");
+                response.put("message", "Registered");
+                return response;
             } else {
-                logger.error("Unknown error");
-                return "Internal error";
+                response.put("status", "500");
+                response.put("message","Internal error");
+                return response;
             }
         }
-        return String.format("User with username '%s' already exists", username);
+        response.put("status", "403");
+        response.put("message", "This username is not available");
+        return response;
     }
 
     public boolean isAuthenticated(User user) {

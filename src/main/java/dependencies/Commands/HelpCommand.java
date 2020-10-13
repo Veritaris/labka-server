@@ -1,6 +1,6 @@
 package dependencies.Commands;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HelpCommand extends Commands{
 
@@ -9,7 +9,7 @@ public class HelpCommand extends Commands{
     }
 
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.help();
     }
 }

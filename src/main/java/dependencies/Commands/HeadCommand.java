@@ -1,6 +1,6 @@
 package dependencies.Commands;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class HeadCommand extends Commands {
 
@@ -8,7 +8,7 @@ public class HeadCommand extends Commands {
         this.name = name;
     }
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.head();
     }
 }

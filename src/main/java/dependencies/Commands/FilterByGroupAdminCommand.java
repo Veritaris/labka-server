@@ -1,6 +1,6 @@
 package dependencies.Commands;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class FilterByGroupAdminCommand extends Commands {
     String argument;
@@ -10,7 +10,7 @@ public class FilterByGroupAdminCommand extends Commands {
         this.argument = argument;
     }
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.filter_by_group_admin(argument);
     }
 }

@@ -2,7 +2,7 @@ package dependencies.Commands;
 
 import dependencies.UserAuthorization.User;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class RemoveByIdCommand extends Commands {
 
@@ -16,7 +16,7 @@ public class RemoveByIdCommand extends Commands {
     }
 
     @Override
-    public ArrayList<String> execute(){
+    public HashMap<String, String> execute(){
         return manager.remove_by_id(groupID, user);
     }
 }
