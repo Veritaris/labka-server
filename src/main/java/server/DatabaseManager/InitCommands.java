@@ -1,5 +1,6 @@
 package server.DatabaseManager;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 
@@ -21,9 +22,14 @@ public final class InitCommands {
                 "students_to_expel smallint not null," +
                 "expelled_students smallint not null," +
                 "creation_date date not null," +
+                "color varchar(7) not null default '#808080'," +
                 "author varchar(24) not null," +
                 "primary key (admin_hash)" +
                 ");");
+        this.commands.put(
+                "addColorColumn",
+                "alter table %s.study_groups add column if not exists color varchar(7) not null default '#808080';"
+        );
         this.commands.put(
                 "createAdminTableSQL",
                 "create table if not exists %s.admins(" +

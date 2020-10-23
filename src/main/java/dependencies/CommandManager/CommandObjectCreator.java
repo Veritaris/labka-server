@@ -42,14 +42,14 @@ public class CommandObjectCreator {
                         )
                     );
                     System.out.println(commandObject);
-                    return (commandObject.getStudyGroup() != null) ? commandObject : createErrorObject(command, "Error, see errors above");
+                    return (commandObject.getStudyGroup() != null) ? commandObject : createErrorObject("400", "Error, see errors above");
                 }
                 return new CommandObject(command, studyGroupCreator.constructor(0L));
 
             default:
                 if (!availableCommands.contains(command)) {
                     return createErrorObject(
-                            command,
+                            "400",
                             String.format(
                                     "Unknown command: '%s', use 'help' to get all available commands",
                                     command
@@ -75,29 +75,29 @@ public class CommandObjectCreator {
                                 }
                                 return new CommandObject(command, studyGroupCreator.constructor(0L));
                             } else {
-                                return createErrorObject(command, String.format("groupID must be a long, got '%s'", commandArgs.get(0)));
+                                return createErrorObject("400", String.format("groupID must be a long, got '%s'", commandArgs.get(0)));
                             }
 
                         case "remove_by_id":
                             groupID = toLong(commandArgs.get(0));
                             return (groupID != -1) ?
                                     (new CommandObject(command, groupID)) :
-                                    createErrorObject(command, creationError);
+                                    createErrorObject("400", creationError);
 
                         case "execute_script":
                             return new CommandObject(command);
 
                         default:
-                            return createErrorObject(command, "Unknown error, sorry");
+                            return createErrorObject("400", "Unknown error, sorry");
                     }
                 } else {
-                    return createErrorObject(command, "Not enough arguments");
+                    return createErrorObject("400", "Not enough arguments");
                 }
         }
     }
 
     public static CommandObject createErrorObject(String errorCode, String errorDescription) {
-        commandObject = new CommandObject(errorCode);
+        commandObject = new CommandObject("error");
         commandObject.setIsFailed(true);
         commandObject.setFailReason(errorDescription);
         commandObject.setBody(new HashMap<String, String>(){{

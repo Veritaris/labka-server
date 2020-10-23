@@ -31,6 +31,7 @@ public class CommandProcessor {
             switch (command) {
                 case "register":
                     commandObjectToSend.setBody(new RegisterCommand(command, user).execute());
+                    commandObjectToSend.setSender(receivedCommandObject.getSender());
                     return commandObjectToSend;
 
                 case "login":
@@ -44,6 +45,14 @@ public class CommandProcessor {
         commandObjectToSend = new CommandObject(command);
 
         switch (command) {
+            case "login":
+                commandObjectToSend.setBody(new LoginCommand(command, user).execute());
+                break;
+//                return CommandObjectCreator.createErrorObject("403", "You are already logged in...are you real?");
+
+            case "register":
+                return CommandObjectCreator.createErrorObject("403", "Permission denied");
+
             case "logout":
                 commandObjectToSend.setBody(
                         new LogoutCommand(command, user).execute()
@@ -135,8 +144,9 @@ public class CommandProcessor {
                 break;
 
             default:
-                System.out.println("!Something went wrong in Commander!");
+                return CommandObjectCreator.createErrorObject("400", "Unknown command");
         }
+        commandObjectToSend.setStudyGroups(CommandExecutor.getInstance().retrieveGroups());
         this.commandExecutor.addToHistory(command);
         return commandObjectToSend;
     }

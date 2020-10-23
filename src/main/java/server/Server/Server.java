@@ -129,7 +129,9 @@ public class Server {
                     logger.error(String.format("\t%s",stacktraceLine));
                 }
             }
-
+//            for (SocketAddress address: this.messageReceiver.clients) {
+//                this.messageSender.sendMessage(commandObjectToSend, address);
+//            }
             this.messageSender.sendMessage(commandObjectToSend, this.messageReceiver.getClientAddress());
         }
     }

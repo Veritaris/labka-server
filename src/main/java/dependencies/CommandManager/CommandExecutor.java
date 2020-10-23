@@ -2,7 +2,6 @@ package dependencies.CommandManager;
 
 
 import dependencies.UserAuthorization.User;
-import org.omg.CosNaming.NamingContextExtPackage.StringNameHelper;
 import server.Authorization.Authorization;
 import dependencies.Collection.*;
 
@@ -16,7 +15,7 @@ import java.time.LocalDate;
 import java.util.*;
 
 @SuppressWarnings({"FieldCanBeLocal", "FieldMayBeFinal", "Convert2MethodRef", "SimplifyStreamApiCallChains", "AccessStaticViaInstance"})
-public class CommandExecutor {
+public class CommandExecutor implements Serializable {
     private static final Logger logger = LogManager.getLogger();
     private static DatabaseManager databaseManager;
 
@@ -114,6 +113,7 @@ public class CommandExecutor {
 
         message.put("message", m[0]);
         if (message.size() == 0) {
+            message.put("status", "404");
             message.put("message", "Collection is empty");
         }
         return message;
@@ -139,11 +139,13 @@ public class CommandExecutor {
 
     public HashMap<String, String> addStudyGroup(StudyGroup group, String author) {
         message.clear();
+        String groupColor = String.format("#%s", (int) (hashCode() % 1e6));
         try {
             databaseManager.addGroup(
-                    group.getName(), group.getSemester(), group.getCoordinates().getX(), group.getCoordinates().getY(),
-                    group.getStudentsCount(), group.getGroupAdmin().getNationality(), group.getGroupAdmin().getHeight(),
-                    group.getGroupAdmin().getWeight(), group.getGroupAdmin().getName(), group.getToExpelAmount(), group.getExpelledStudentsAmount(), LocalDate.now(), author
+                    group.getName(), group.getSemesterObject(), group.getCoordinatesObject().getX(), group.getCoordinatesObject().getY(),
+                    group.getStudentsCount(), group.getGroupAdminObject().getNationality(), group.getGroupAdminObject().getHeight(),
+                    group.getGroupAdminObject().getWeight(), group.getGroupAdminObject().getName(), group.getToExpelAmount(), group.getExpelledStudentsAmount(), LocalDate.now(),
+                    groupColor, author
             );
             groups = databaseManager.getAllGroups();
             sortGroups();
@@ -165,9 +167,9 @@ public class CommandExecutor {
         } else {
             if (authLib.hasPermissionToEdit(user, group.getId())) {
                 databaseManager.updateGroup(
-                        group.getId(), group.getName(), group.getSemester(), group.getCoordinates().getX(), group.getCoordinates().getY(),
-                        group.getStudentsCount(), group.getGroupAdmin().getNationality(), group.getGroupAdmin().getHeight(),
-                        group.getGroupAdmin().getWeight(), group.getGroupAdmin().getName(), group.getToExpelAmount(), group.getExpelledStudentsAmount()
+                        group.getId(), group.getName(), group.getSemesterObject(), group.getCoordinatesObject().getX(), group.getCoordinatesObject().getY(),
+                        group.getStudentsCount(), group.getGroupAdminObject().getNationality(), group.getGroupAdminObject().getHeight(),
+                        group.getGroupAdminObject().getWeight(), group.getGroupAdminObject().getName(), group.getToExpelAmount(), group.getExpelledStudentsAmount()
                 );
                 this.groups = this.databaseManager.getAllGroups();
                 message.put("status", "200");
@@ -182,26 +184,25 @@ public class CommandExecutor {
 
     public HashMap<String, String> remove_by_id(Long id, User user) {
         message.clear();
-        boolean foundFlag = false;
+
         for (StudyGroup studyGroup : groups) {
             if (studyGroup.getId().equals(id)) {
                 if (authLib.hasPermissionToEdit(user, id)) {
-                    groups.remove(studyGroup);
-                    foundFlag = true;
                     databaseManager.deleteById(id);
+                    groups.remove(studyGroup);
+
                     message.put("status", "200");
                     message.put("message", String.format("Group with id '%s' was deleted", id));
                 } else {
                     message.put("status", "403");
                     message.put("message", "Permission denied");
                 }
-                break;
+                return message;
             }
         }
-        if (!foundFlag) {
-            message.put("status", "404");
-            message.put("message", "Element with given id doesn't exist!");
-        }
+        message.put("status", "404");
+        message.put("message", "Element with given id doesn't exist!");
+
         return message;
     }
 
@@ -343,7 +344,7 @@ public class CommandExecutor {
         Person groupAdmin = new Person(nameA, heightA, weightA, countryA);
 
         for (StudyGroup studyGroup: groups) {
-            if (studyGroup.getGroupAdmin().equals(groupAdmin)) {
+            if (studyGroup.getGroupAdminObject().equals(groupAdmin)) {
                 message.put("status", "200");
                 message.put("message", studyGroup.toString());
                 foundFlag = true;
@@ -356,5 +357,9 @@ public class CommandExecutor {
         }
 
         return message;
+    }
+
+    public ArrayList<StudyGroup> retrieveGroups() {
+        return this.databaseManager.getAllGroups();
     }
 }

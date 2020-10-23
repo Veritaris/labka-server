@@ -5,6 +5,7 @@ import dependencies.Collection.StudyGroup;
 import dependencies.UserAuthorization.User;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 @SuppressWarnings("UnusedReturnValue")
@@ -17,6 +18,8 @@ public class CommandObject implements Serializable {
     private StudyGroup studyGroup;
     private String stringArgument;
     private Long groupID;
+
+    private ArrayList<StudyGroup> studyGroups = new ArrayList<>();
 
     private User user = new User("", "");
 
@@ -48,6 +51,14 @@ public class CommandObject implements Serializable {
     public CommandObject(String command, String username, String rawPassword) {
         this.name = command;
         this.user = new User(username, rawPassword);
+    }
+
+    public ArrayList<StudyGroup> getStudyGroups() {
+        return studyGroups;
+    }
+
+    public void setStudyGroups(ArrayList<StudyGroup> studyGroups) {
+        this.studyGroups = studyGroups;
     }
 
     public HashMap<String, String> getBody() {

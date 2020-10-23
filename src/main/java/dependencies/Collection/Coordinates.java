@@ -11,6 +11,11 @@ public class Coordinates implements Serializable {
         this.y = y;
     }
 
-    public long getX() { return x;}
-    public long getY() { return y;}
+    public long getX() { return this.x;}
+    public long getY() { return this.y;}
+
+    @Override
+    public String toString() {
+        return String.format("(%s; %s)", this.x, this.y);
+    }
 }

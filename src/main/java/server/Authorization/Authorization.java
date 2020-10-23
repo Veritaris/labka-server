@@ -6,6 +6,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import server.DatabaseManager.DatabaseManager;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -16,10 +17,6 @@ public class Authorization {
     private static final Logger logger = LogManager.getLogger();
     private HashSet<String> authenticatedUsers;
     private DatabaseManager databaseManager;
-    private HashMap<String, String> response = new HashMap<String, String>(){{
-        put("status", "");
-        put("message", "");
-    }};
 
     public Authorization(DatabaseManager databaseManager) {
         this.databaseManager = databaseManager;
@@ -34,7 +31,7 @@ public class Authorization {
     }
 
     public HashMap<String, String> loginUser(String username, String rawPassword) {
-        System.out.printf("%s, %s\n", username, rawPassword);
+        HashMap<String, String> response = new HashMap<>();
         User userToLogin = new User(username, rawPassword);
 
         if (this.databaseManager.getUser(username) != null){
@@ -54,6 +51,7 @@ public class Authorization {
     }
 
     public HashMap<String, String> logoutUser(User user) {
+        HashMap<String, String> response = new HashMap<>();
         this.authenticatedUsers.remove(user.getToken());
         logger.info(
                 String.format("User '%s' logged out at '%s'", user.getUsername(), LocalDateTime.now())
@@ -64,6 +62,7 @@ public class Authorization {
     }
 
     public HashMap<String, String> registerUser(String username, String rawPassword) {
+        HashMap<String, String> response = new HashMap<>();
         if (this.databaseManager.getUser(username) == null) {
             if (this.databaseManager.addUser(username, hashPassword(rawPassword), UUID.randomUUID())) {
                 logger.info(

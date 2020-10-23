@@ -10,6 +10,7 @@ import java.io.ObjectInputStream;
 import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
+import java.util.ArrayList;
 import java.util.concurrent.Callable;
 
 @SuppressWarnings("FieldCanBeLocal")
@@ -21,6 +22,8 @@ public class Receiver {
     private ByteArrayInputStream bais;
     private ObjectInputStream ois;
 
+    public ArrayList<SocketAddress> clients = new ArrayList<>();
+
     private ByteBuffer buffer = ByteBuffer.allocate(8 * 1024);
     private byte[] message = new byte[8 * 1024];
 
@@ -31,6 +34,7 @@ public class Receiver {
     Callable<CommandObject> handleMessage = () -> {
         try {
             this.clientAddress = this.datagramChannel.receive(buffer);
+            this.clients.add(this.clientAddress);
             buffer.flip();
             message = new byte[buffer.limit()];
             buffer.get(message, 0, buffer.limit());

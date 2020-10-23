@@ -50,7 +50,7 @@ public class Sender {
         try {
             assert payload != null;
             this.datagramChannel.send(ByteBuffer.wrap(payload), this.address);
-            logger.info(String.format("Sending response to %s: %s", this.address, commandObject).replace("\\n", ""));
+            logger.info(String.format("Sending response to %s: %s, status: %s , message: \"%s\"", this.address, commandObject, commandObject.getBody().get("status"), commandObject.getBody().get("message")).replace("\\n", ""));
         } catch (IOException e) {
             System.out.printf("Something wrong with given message: %s\n", commandObject.toString());
         }

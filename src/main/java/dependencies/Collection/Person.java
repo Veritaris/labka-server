@@ -28,10 +28,11 @@ public class Person implements Serializable {
 
     @Override
     public String toString() {
-        return String.format(
-                "Person<name='%s', height='%s', weight='%s', nationality='%s'>",
-                this.getName(), this.getHeight(), this.getWeight(), this.getNationality()
-                );
+        return String.format("%s from %s", this.name, this.getNationality().getTittle());
+//        return String.format(
+//                "Person<name='%s', height='%s', weight='%s', nationality='%s'>",
+//                this.getName(), this.getHeight(), this.getWeight(), this.getNationality()
+//        );
     }
 
     @Override

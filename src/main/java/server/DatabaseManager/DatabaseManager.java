@@ -186,7 +186,7 @@ public class DatabaseManager {
 
     public void addGroup(String name, Semester semester, Long x, Long y, Integer students_amount, Country nationality,
                          Double height, Integer weight, String adminName, Integer students_to_expel, Integer expelled_students, LocalDate creation_date,
-                         String author) throws SameAdminException{
+                         String color, String author) throws SameAdminException{
 
         String admin_hash = DigestUtils.md5Hex(String.format("%s%s%s%s", nationality, height, weight, adminName));
         String addAdminQuery = String.format(
@@ -194,8 +194,8 @@ public class DatabaseManager {
                 this.schemaName, this.schemaName, nationality, height, weight, adminName, admin_hash
         );
         String addGroupQuery = String.format(
-                "insert into %s.study_groups values (nextval('%s.study_groups_id_seq'), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
-                this.schemaName, this.schemaName, name, semester, x, y, students_amount, admin_hash, students_to_expel, expelled_students, creation_date, author
+                "insert into %s.study_groups values (nextval('%s.study_groups_id_seq'), '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')",
+                this.schemaName, this.schemaName, name, semester, x, y, students_amount, admin_hash, students_to_expel, expelled_students, creation_date, author, color
         );
 
         try (Connection dbConnection = DriverManager.getConnection(this.url, this.username, this.password)) {
@@ -243,9 +243,9 @@ public class DatabaseManager {
 
         executeSQL(updateGroupQuery);
 
-        if (admin_hash.equals(getGroup(id).getGroupAdmin().getPersonHash())) {
-            executeSQL(updateAdminQuery);
+        if (!admin_hash.equals(getGroup(id).getGroupAdminObject().getPersonHash())) {
             executeSQL(updateGroupAdminQuery);
+            executeSQL(updateAdminQuery);
         }
     }
 
@@ -284,8 +284,11 @@ public class DatabaseManager {
             int toExpelAmount = dbGroupData.getInt("students_to_expel");
             int expelledStudentsAmount = dbGroupData.getInt("expelled_students");
             LocalDate creationDate =  dbGroupData.getDate("creation_date").toLocalDate();
+            String colorHex = dbGroupData.getString("color");
+            String author = dbGroupData.getString("author");
 
-            studyGroup = new StudyGroup(group_id, name, semester, coordinates, studentsCount, admin, toExpelAmount, expelledStudentsAmount, creationDate);
+            studyGroup = new StudyGroup(group_id, name, semester, coordinates, studentsCount, admin, toExpelAmount, expelledStudentsAmount, creationDate, colorHex, author);
+
         } catch (SQLException e) {
             e.printStackTrace();
         }
